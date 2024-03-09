@@ -1,0 +1,6 @@
+suites:
+    main:
+        namespace: MonsieurBiz\SyliusMarkerioPlugin
+        psr4_prefix: MonsieurBiz\SyliusMarkerioPlugin
+        src_path: src
+        spec_path: tests
