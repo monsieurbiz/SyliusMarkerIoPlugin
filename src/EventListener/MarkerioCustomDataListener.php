@@ -11,32 +11,56 @@ declare(strict_types=1);
 
 namespace MonsieurBiz\SyliusMarkerioPlugin\EventListener;
 
+use MonsieurBiz\SyliusMarkerioPlugin\Event\MarkerioCustomDataEvent;
 use MonsieurBiz\SyliusMarkerioPlugin\Event\MarkerioCustomDataEventInterface;
 use Sylius\Component\Core\Context\ShopperContextInterface;
 use Sylius\Component\Order\Context\CartContextInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Security\Core\Authentication\Token\AbstractToken;
 
-class MarkerioCustomDataListener
+#[AsEventListener(MarkerioCustomDataEvent::class, 'appendCustomData', 100)]
+final class MarkerioCustomDataListener
 {
+    private mixed $adminToken = null;
+
     public function __construct(
-        private ShopperContextInterface $shopperContext,
-        private CartContextInterface $cartContext,
+        private readonly ShopperContextInterface $shopperContext,
+        private readonly CartContextInterface $cartContext,
+        private readonly RequestStack $requestStack,
     ) {
     }
 
     public function appendCustomData(MarkerioCustomDataEventInterface $event): void
     {
+        if ($this->isAdminUserLoggedIn()) {
+            $event->mergeData([
+                'admin' => true,
+                'shop' => false,
+                'admin_user' => [
+                    'id' => $this->getAdminToken()?->getUser()?->getId(),
+                    'username' => $this->getAdminToken()?->getUser()?->getUsername(),
+                    'roles' => $this->getAdminToken()?->getUser()?->getRoles(),
+                ],
+            ]);
+        } else {
+            $event->mergeData([
+                'admin' => false,
+                'shop' => true,
+                'channel' => [
+                    'code' => $this->shopperContext->getChannel()?->getCode(),
+                    'name' => $this->shopperContext->getChannel()?->getName(),
+                ],
+                'customer' => [
+                    'id' => $this->shopperContext->getCustomer()?->getId(),
+                    'email' => $this->shopperContext->getCustomer()?->getEmail(),
+                ],
+                'currency' => $this->shopperContext->getCurrencyCode(),
+                'cart' => $this->getCartData(),
+            ]);
+        }
         $event->mergeData([
-            'channel' => [
-                'code' => $this->shopperContext->getChannel()?->getCode(),
-                'name' => $this->shopperContext->getChannel()?->getName(),
-            ],
-            'customer' => [
-                'id' => $this->shopperContext->getCustomer()?->getId(),
-                'email' => $this->shopperContext->getCustomer()?->getEmail(),
-            ],
             'locale' => $this->shopperContext->getLocaleCode(),
-            'currency' => $this->shopperContext->getCurrencyCode(),
-            'cart' => $this->getCartData(),
         ]);
     }
 
@@ -65,5 +89,24 @@ class MarkerioCustomDataListener
             'total' => $cart->getTotal(),
             'items' => $items,
         ];
+    }
+
+    private function isAdminUserLoggedIn(): bool
+    {
+        return null !== $this->getAdminToken() && null !== $this->getAdminToken()->getUser();
+    }
+
+    private function getAdminToken(): ?AbstractToken
+    {
+        $session = $this->requestStack->getSession();
+        if (!$session->has('_security_admin')) {
+            return null;
+        }
+
+        if (null === $this->adminToken) {
+            $this->adminToken = unserialize($session->get('_security_admin'));
+        }
+
+        return $this->adminToken;
     }
 }

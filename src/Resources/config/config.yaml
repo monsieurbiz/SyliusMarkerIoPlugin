@@ -3,12 +3,12 @@ sylius_ui:
         sylius.shop.layout.after_body:
             blocks:
                 monsieurbiz_markerio_metadata:
-                    template: '@MonsieurBizSyliusMarkerioPlugin/markerio_metadata_render.html.twig'
+                    template: '@MonsieurBizSyliusMarkerioPlugin/Shop/render.html.twig'
                     priority: 10
         sylius.admin.layout.javascripts:
             blocks:
                 monsieurbiz_markerio_metadata:
-                    template: '@MonsieurBizSyliusMarkerioPlugin/markerio_metadata_render.html.twig'
+                    template: '@MonsieurBizSyliusMarkerioPlugin/metadata.html.twig'
                     priority: 10
 
 monsieurbiz_sylius_settings:
@@ -16,8 +16,8 @@ monsieurbiz_sylius_settings:
         monsieurbiz.markerio:
             vendor_name: Monsieur Biz
             vendor_url: https://monsieurbiz.com/
-            plugin_name: Marker.io
-            description: Marker.io settings
+            plugin_name: monsieurbiz_sylius_markerio_plugin.settings.plugin_name
+            description: monsieurbiz_sylius_markerio_plugin.settings.description
             icon: paper plane outline
             use_locales: false
             classes:

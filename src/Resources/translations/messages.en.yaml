@@ -1,0 +1,7 @@
+monsieurbiz_sylius_markerio_plugin:
+    form:
+        settings:
+            project_id: Project ID on Marker.io
+    settings:
+        plugin_name: Marker.io
+        description: Settings for Marker.io

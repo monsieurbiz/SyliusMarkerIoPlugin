@@ -16,10 +16,10 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
-class MarkerioTwigExtension extends AbstractExtension
+final class MarkerioTwigExtension extends AbstractExtension
 {
     public function __construct(
-        private EventDispatcherInterface $eventDispatcher
+        private readonly EventDispatcherInterface $eventDispatcher
     ) {
     }
 

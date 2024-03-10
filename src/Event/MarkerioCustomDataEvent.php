@@ -11,7 +11,7 @@ declare(strict_types=1);
 
 namespace MonsieurBiz\SyliusMarkerioPlugin\Event;
 
-class MarkerioCustomDataEvent implements MarkerioCustomDataEventInterface
+final class MarkerioCustomDataEvent implements MarkerioCustomDataEventInterface
 {
     private array $data = [];
 

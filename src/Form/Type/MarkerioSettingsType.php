@@ -15,11 +15,12 @@ use MonsieurBiz\SyliusSettingsPlugin\Form\AbstractSettingsType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 
-class MarkerioSettingsType extends AbstractSettingsType
+final class MarkerioSettingsType extends AbstractSettingsType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $this->addWithDefaultCheckbox($builder, 'project_id', TextType::class, [
+            'label' => 'monsieurbiz_sylius_markerio_plugin.form.settings.project_id',
             'required' => false,
         ]);
     }
