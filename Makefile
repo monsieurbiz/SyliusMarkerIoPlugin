@@ -146,6 +146,10 @@ doctrine.migration.diff: ## create a diff migration file for the plugin
 	${CONSOLE} doctrine:migrations:diff --namespace="${DOCTRINE_MIGRATIONS_NAMESPACE}"
 .PHONY: doctrine.migration.diff
 
+doctrine.migration.migrate: ## Run migrations
+	${CONSOLE} doctrine:migration:migrate -n
+.PHONY: doctrine.migration.migrate
+
 ###
 ### SYLIUS
 ### ¯¯¯¯¯¯

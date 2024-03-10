@@ -12,3 +12,6 @@ services:
         resource: '../../Controller'
         tags: [ 'controller.service_arguments' ]
 
+    MonsieurBiz\SyliusMarkerioPlugin\EventListener\MarkerioCustomDataListener:
+        tags:
+            - { name: kernel.event_listener, event: MonsieurBiz\SyliusMarkerioPlugin\Event\MarkerioCustomDataEvent, method: appendCustomData }
