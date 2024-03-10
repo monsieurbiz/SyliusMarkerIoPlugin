@@ -26,8 +26,8 @@ final class MarkerioCustomDataListener
 
     public function __construct(
         private readonly ShopperContextInterface $shopperContext,
-        private readonly CartContextInterface $cartContext,
-        private readonly RequestStack $requestStack,
+        private readonly CartContextInterface    $cartContext,
+        private readonly RequestStack            $requestStack,
     ) {
     }
 
@@ -35,18 +35,17 @@ final class MarkerioCustomDataListener
     {
         if ($this->isAdminUserLoggedIn()) {
             $event->mergeData([
-                'admin' => true,
-                'shop' => false,
-                'admin_user' => [
-                    'id' => $this->getAdminToken()?->getUser()?->getId(),
-                    'username' => $this->getAdminToken()?->getUser()?->getUsername(),
-                    'roles' => $this->getAdminToken()?->getUser()?->getRoles(),
+                'admin' => [
+                    'user' => [
+                        'id' => $this->getAdminToken()?->getUser()?->getId(),
+                        'username' => $this->getAdminToken()?->getUser()?->getUsername(),
+                        'roles' => $this->getAdminToken()?->getUser()?->getRoles(),
+                    ],
                 ],
             ]);
-        } else {
-            $event->mergeData([
-                'admin' => false,
-                'shop' => true,
+        }
+        $event->mergeData([
+            'front' => [
                 'channel' => [
                     'code' => $this->shopperContext->getChannel()?->getCode(),
                     'name' => $this->shopperContext->getChannel()?->getName(),
@@ -57,9 +56,7 @@ final class MarkerioCustomDataListener
                 ],
                 'currency' => $this->shopperContext->getCurrencyCode(),
                 'cart' => $this->getCartData(),
-            ]);
-        }
-        $event->mergeData([
+            ],
             'locale' => $this->shopperContext->getLocaleCode(),
         ]);
     }
