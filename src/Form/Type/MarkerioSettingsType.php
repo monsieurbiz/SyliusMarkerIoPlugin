@@ -17,6 +17,9 @@ use Symfony\Component\Form\FormBuilderInterface;
 
 final class MarkerioSettingsType extends AbstractSettingsType
 {
+    /**
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $this->addWithDefaultCheckbox($builder, 'project_id', TextType::class, [

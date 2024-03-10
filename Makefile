@@ -76,6 +76,7 @@ setup_application:
 	(cd ${APP_DIR} && ${COMPOSER} require --no-install --no-scripts --no-progress sylius/sylius="~${SYLIUS_VERSION}") # Make sure to install the required version of sylius because the sylius-standard has a soft constraint
 	$(MAKE) ${APP_DIR}/.php-version
 	$(MAKE) ${APP_DIR}/php.ini
+	(cd ${APP_DIR} && ${COMPOSER} require --no-progress api-platform/core="2.7.16")
 	(cd ${APP_DIR} && ${COMPOSER} install --no-interaction)
 	$(MAKE) apply_dist
 	(cd ${APP_DIR} && ${COMPOSER} require --no-progress monsieurbiz/${PLUGIN_NAME}="*@dev")
@@ -141,6 +142,9 @@ test.twig: ## Validate Twig templates
 ###
 ### MIGRATIONS
 ### ¯¯¯¯¯¯¯¯¯¯
+
+app.doctrine.migration.diff: ## create a diff migration file for the Test Application
+	${CONSOLE} doctrine:migrations:diff --namespace="App\Migrations"
 
 doctrine.migration.diff: ## create a diff migration file for the plugin
 	${CONSOLE} doctrine:migrations:diff --namespace="${DOCTRINE_MIGRATIONS_NAMESPACE}"

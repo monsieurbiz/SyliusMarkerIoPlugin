@@ -65,6 +65,12 @@ jobs:
               run: |
                   composer require --no-install --no-scripts --no-progress sylius/sylius="${{ matrix.sylius }}"
 
+            # Because of an issue with the autoloading of api-platform
+            - name: Constraint of api-platform/core
+              working-directory: ./sylius
+              run: |
+                  composer require --no-install --no-scripts --no-progress api-platform/core="2.7.16"
+
             - name: Setup some requirements
               working-directory: ./sylius
               run: |

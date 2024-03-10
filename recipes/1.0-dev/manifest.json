@@ -1,6 +1,6 @@
 {
     "bundles": {
-        "MonsieurBiz\\SyliusMarkerioPlugin\\SyliusMarkerioPlugin": [
+        "MonsieurBiz\\SyliusMarkerioPlugin\\MonsieurBizSyliusMarkerioPlugin": [
             "all"
         ]
     },

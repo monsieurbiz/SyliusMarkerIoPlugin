@@ -1,18 +1,13 @@
-includes:
-    - vendor/phpstan/phpstan-doctrine/extension.neon
-    - vendor/phpstan/phpstan-webmozart-assert/extension.neon
-
 parameters:
     level: max
     paths:
-        - %rootDir%/src/
+        - %currentWorkingDirectory%/src/
 
     checkMissingIterableValueType: false
     checkGenericClassInNonGenericObjectType: false
 
-    excludePaths:
-        # Makes PHPStan crash
-        - 'src/DependencyInjection/SyliusMarkerioExtension.php'
+    scanDirectories:
+      - %currentWorkingDirectory%/tests/Application/src/
 
-        # Test dependencies
-        - 'tests/Application/**/*'
+    bootstrapFiles:
+        - %currentWorkingDirectory%/vendor/autoload.php

@@ -13,7 +13,7 @@ namespace MonsieurBiz\SyliusMarkerioPlugin\Event;
 
 interface MarkerioCustomDataEventInterface
 {
-    public function setData($key, $value): static;
+    public function setData(string $key, mixed $value): static;
 
     public function mergeData(array $data): static;
 

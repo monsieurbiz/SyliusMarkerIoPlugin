@@ -11,6 +11,9 @@ declare(strict_types=1);
 
 namespace MonsieurBiz\SyliusMarkerioPlugin\EventListener;
 
+use App\Entity\Order\OrderItem;
+use App\Entity\Product\ProductVariant;
+use App\Entity\User\AdminUser;
 use MonsieurBiz\SyliusMarkerioPlugin\Event\MarkerioCustomDataEvent;
 use MonsieurBiz\SyliusMarkerioPlugin\Event\MarkerioCustomDataEventInterface;
 use Sylius\Component\Core\Context\ShopperContextInterface;
@@ -22,24 +25,26 @@ use Symfony\Component\Security\Core\Authentication\Token\AbstractToken;
 #[AsEventListener(MarkerioCustomDataEvent::class, 'appendCustomData', 100)]
 final class MarkerioCustomDataListener
 {
-    private mixed $adminToken = null;
+    private ?AbstractToken $adminToken = null;
 
     public function __construct(
         private readonly ShopperContextInterface $shopperContext,
-        private readonly CartContextInterface    $cartContext,
-        private readonly RequestStack            $requestStack,
+        private readonly CartContextInterface $cartContext,
+        private readonly RequestStack $requestStack,
     ) {
     }
 
     public function appendCustomData(MarkerioCustomDataEventInterface $event): void
     {
         if ($this->isAdminUserLoggedIn()) {
+            /** @var AdminUser|null $adminUser */
+            $adminUser = $this->getAdminToken()?->getUser();
             $event->mergeData([
                 'admin' => [
                     'user' => [
-                        'id' => $this->getAdminToken()?->getUser()?->getId(),
-                        'username' => $this->getAdminToken()?->getUser()?->getUsername(),
-                        'roles' => $this->getAdminToken()?->getUser()?->getRoles(),
+                        'id' => $adminUser?->getId(),
+                        'username' => $adminUser?->getUsername(),
+                        'roles' => $adminUser?->getRoles(),
                     ],
                 ],
             ]);
@@ -47,8 +52,8 @@ final class MarkerioCustomDataListener
         $event->mergeData([
             'front' => [
                 'channel' => [
-                    'code' => $this->shopperContext->getChannel()?->getCode(),
-                    'name' => $this->shopperContext->getChannel()?->getName(),
+                    'code' => $this->shopperContext->getChannel()->getCode(),
+                    'name' => $this->shopperContext->getChannel()->getName(),
                 ],
                 'customer' => [
                     'id' => $this->shopperContext->getCustomer()?->getId(),
@@ -61,19 +66,22 @@ final class MarkerioCustomDataListener
         ]);
     }
 
-    private function getCartData(): ?array
+    private function getCartData(): array
     {
         $cart = $this->cartContext->getCart();
         $items = [];
+        /** @var OrderItem $item */
         foreach ($cart->getItems() as $item) {
+            /** @var ProductVariant|null $variant */
+            $variant = $item->getVariant();
             $items[] = [
                 'id' => $item->getId(),
                 'variant' => [
-                    'id' => $item->getVariant()?->getId(),
-                    'code' => $item->getVariant()?->getCode(),
-                    'name' => $item->getVariant()?->getName(),
-                    'on_hand' => $item->getVariant()?->getOnHand(),
-                    'on_hold' => $item->getVariant()?->getOnHold(),
+                    'id' => $variant?->getId(),
+                    'code' => $variant?->getCode(),
+                    'name' => $variant?->getName(),
+                    'on_hand' => $variant?->getOnHand(),
+                    'on_hold' => $variant?->getOnHold(),
                 ],
                 'quantity' => $item->getQuantity(),
                 'unit_price' => $item->getUnitPrice(),
@@ -101,9 +109,11 @@ final class MarkerioCustomDataListener
         }
 
         if (null === $this->adminToken) {
-            $this->adminToken = unserialize($session->get('_security_admin'));
+            // @phpstan-ignore-next-line
+            $this->adminToken = unserialize((string) $session->get('_security_admin'));
         }
 
+        // @phpstan-ignore-next-line
         return $this->adminToken;
     }
 }

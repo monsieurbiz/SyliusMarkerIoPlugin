@@ -15,7 +15,7 @@ final class MarkerioCustomDataEvent implements MarkerioCustomDataEventInterface
 {
     private array $data = [];
 
-    public function setData($key, $value): static
+    public function setData(string $key, mixed $value): static
     {
         $this->data[$key] = $value;
 
