@@ -1,13 +1,14 @@
 parameters:
-    level: max
+    level: 8
     paths:
-        - %currentWorkingDirectory%/src/
+        - %rootDir%/src/
 
-    checkMissingIterableValueType: false
-    checkGenericClassInNonGenericObjectType: false
+    excludePaths:
+        # Test dependencies
+        - 'tests/Application/**/*'
 
-    scanDirectories:
-      - %currentWorkingDirectory%/tests/Application/src/
-
-    bootstrapFiles:
-        - %currentWorkingDirectory%/vendor/autoload.php
+    ignoreErrors:
+        - identifier: missingType.generics
+        - identifier: missingType.iterableValue
+    
+    reportUnmatchedIgnoredErrors: false

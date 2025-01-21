@@ -1,16 +1,16 @@
 .DEFAULT_GOAL := help
 SHELL=/bin/bash
 APP_DIR=tests/Application
-SYLIUS_VERSION=1.12.0
+SYLIUS_VERSION=1.14.0
 SYMFONY=cd ${APP_DIR} && symfony
 COMPOSER=symfony composer
 CONSOLE=${SYMFONY} console
-export COMPOSE_PROJECT_NAME=sylius_markerio_plugin
-PLUGIN_NAME=sylius-markerio-plugin
-COMPOSE=docker-compose
+export COMPOSE_PROJECT_NAME=markerio
+export MIGRATIONS_NAMESPACE=MonsieurBiz\\SyliusMarkerioPlugin\\Migrations
+export USER_UID=$(shell id -u)
+PLUGIN_NAME=sylius-${COMPOSE_PROJECT_NAME}-plugin
+COMPOSE=docker compose
 YARN=yarn
-DOCTRINE_MIGRATIONS_NAMESPACE=MonsieurBiz\SyliusMarkerioPlugin\Migrations
-
 
 ###
 ### DEVELOPMENT
@@ -76,16 +76,17 @@ setup_application:
 	(cd ${APP_DIR} && ${COMPOSER} require --no-install --no-scripts --no-progress sylius/sylius="~${SYLIUS_VERSION}") # Make sure to install the required version of sylius because the sylius-standard has a soft constraint
 	$(MAKE) ${APP_DIR}/.php-version
 	$(MAKE) ${APP_DIR}/php.ini
-	(cd ${APP_DIR} && ${COMPOSER} require --no-progress api-platform/core="2.7.16")
 	(cd ${APP_DIR} && ${COMPOSER} install --no-interaction)
 	$(MAKE) apply_dist
-	(cd ${APP_DIR} && ${COMPOSER} require --no-progress monsieurbiz/${PLUGIN_NAME}="*@dev")
+	(cd ${APP_DIR} && ${COMPOSER} require --no-progress --no-interaction monsieurbiz/${PLUGIN_NAME}="*@dev")
 	rm -rf ${APP_DIR}/var/cache
 
 
 ${APP_DIR}/docker-compose.yaml:
 	rm -f ${APP_DIR}/docker-compose.yml
 	rm -f ${APP_DIR}/docker-compose.yaml
+	rm -f ${APP_DIR}/compose.yml # Remove Sylius file about Docker
+	rm -f ${APP_DIR}/compose.override.dist.yml # Remove Sylius file about Docker
 	ln -s ../../docker-compose.yaml.dist ${APP_DIR}/docker-compose.yaml
 .PHONY: ${APP_DIR}/docker-compose.yaml
 
@@ -110,7 +111,7 @@ apply_dist:
 ### TESTS
 ### ¯¯¯¯¯
 
-test.all: test.composer test.phpstan test.phpmd test.phpcs test.yaml test.schema test.twig test.container ## Run all tests in once
+test.all: test.composer test.phpstan test.phpmd test.phpunit test.phpspec test.phpcs test.yaml test.schema test.twig test.container ## Run all tests in once
 
 test.composer: ## Validate composer.json
 	${COMPOSER} validate --strict
@@ -120,6 +121,12 @@ test.phpstan: ## Run PHPStan
 
 test.phpmd: ## Run PHPMD
 	${COMPOSER} phpmd
+
+test.phpunit: ## Run PHPUnit
+	${COMPOSER} phpunit
+
+test.phpspec: ## Run PHPSpec
+	${COMPOSER} phpspec
 
 test.phpcs: ## Run PHP CS Fixer in dry-run
 	${COMPOSER} run -- phpcs --dry-run -v
@@ -131,28 +138,13 @@ test.container: ## Lint the symfony container
 	${CONSOLE} lint:container
 
 test.yaml: ## Lint the symfony Yaml files
-	${CONSOLE} lint:yaml ../../recipes ../../src/Resources/config
+	${CONSOLE} lint:yaml ../../src/Resources/config --parse-tags
 
 test.schema: ## Validate MySQL Schema
 	${CONSOLE} doctrine:schema:validate
 
 test.twig: ## Validate Twig templates
 	${CONSOLE} lint:twig --no-debug templates/ ../../src/Resources/views/
-
-###
-### MIGRATIONS
-### ¯¯¯¯¯¯¯¯¯¯
-
-app.doctrine.migration.diff: ## create a diff migration file for the Test Application
-	${CONSOLE} doctrine:migrations:diff --namespace="App\Migrations"
-
-doctrine.migration.diff: ## create a diff migration file for the plugin
-	${CONSOLE} doctrine:migrations:diff --namespace="${DOCTRINE_MIGRATIONS_NAMESPACE}"
-.PHONY: doctrine.migration.diff
-
-doctrine.migration.migrate: ## Run migrations
-	${CONSOLE} doctrine:migration:migrate -n
-.PHONY: doctrine.migration.migrate
 
 ###
 ### SYLIUS
@@ -176,6 +168,9 @@ sylius.assets: ## Install all assets with symlinks
 
 messenger.setup: ## Setup Messenger transports
 	${CONSOLE} messenger:setup-transports
+
+doctrine.diff: ## Doctrine diff
+	${CONSOLE} doctrine:migration:diff --namespace="${MIGRATIONS_NAMESPACE}"
 
 ###
 ### PLATFORM

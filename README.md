@@ -18,7 +18,21 @@ This plugin is a Sylius integration for [Marker.io](https://marker.io).
 It gives the capability to integrate the extension if you have a Project ID.  
 In the same time, if the script is loaded, we've added some metadata to the configuration sent to Marker.io.
 
+## Compatibility
+
+| Sylius Version | PHP Version     |
+|----------------|-----------------|
+| 1.12           | 8.1 - 8.2 - 8.3 |
+| 1.13           | 8.1 - 8.2 - 8.3 |
+| 1.14           | 8.1 - 8.2 - 8.3 |
+
 ## Installation
+
+If you want to use our recipes, you can configure your composer.json by running:
+
+```bash
+composer config --no-plugins --json extra.symfony.endpoint '["https://api.github.com/repos/monsieurbiz/symfony-recipes/contents/index.json?ref=flex/master","flex://defaults"]'
+```
 
 ```
 composer require monsieurbiz/sylius-markerio-plugin
