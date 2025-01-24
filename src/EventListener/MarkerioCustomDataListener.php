@@ -11,12 +11,12 @@ declare(strict_types=1);
 
 namespace MonsieurBiz\SyliusMarkerioPlugin\EventListener;
 
-use App\Entity\Order\OrderItem;
-use App\Entity\Product\ProductVariant;
-use App\Entity\User\AdminUser;
 use MonsieurBiz\SyliusMarkerioPlugin\Event\MarkerioCustomDataEvent;
 use MonsieurBiz\SyliusMarkerioPlugin\Event\MarkerioCustomDataEventInterface;
 use Sylius\Component\Core\Context\ShopperContextInterface;
+use Sylius\Component\Core\Model\AdminUser;
+use Sylius\Component\Core\Model\OrderItem;
+use Sylius\Component\Core\Model\ProductVariant;
 use Sylius\Component\Order\Context\CartContextInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -109,11 +109,9 @@ final class MarkerioCustomDataListener
         }
 
         if (null === $this->adminToken) {
-            // @phpstan-ignore-next-line
             $this->adminToken = unserialize((string) $session->get('_security_admin'));
         }
 
-        // @phpstan-ignore-next-line
         return $this->adminToken;
     }
 }
